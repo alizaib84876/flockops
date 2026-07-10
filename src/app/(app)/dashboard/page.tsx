@@ -87,18 +87,38 @@ export default async function DashboardPage() {
     return <OnboardingPrompt />
   }
 
-  // Fetch everything in parallel
-  const [shedsRes, batchesRes, logsRes, salesRes, expensesRes, weightRes] = await Promise.all([
-    supabase.from('sheds').select('id, name, capacity, location').eq('farm_id', farmId).order('name'),
-    supabase.from('batches').select('id, shed_id, breed, placement_date, starting_bird_count, status').eq('farm_id', farmId).eq('status', 'active'),
-    // All logs for active batches (we'll filter by batch_id client-side)
-    supabase.from('daily_logs').select('batch_id, log_date, mortality_count, feed_given_kg, water_given_liters').order('log_date', { ascending: false }),
-    supabase.from('sales').select('batch_id, total_amount'),
-    supabase.from('expenses').select('batch_id, amount'),
-    supabase.from('weight_samples').select('batch_id, avg_weight_g, sample_date').order('sample_date', { ascending: false }),
-  ])
+  // Fetch sheds first, then scope everything else to those shed IDs
+  const shedsRes = await supabase
+    .from('sheds')
+    .select('id, name, capacity, location')
+    .eq('farm_id', farmId)
+    .order('name')
 
   const allSheds: RawShed[] = shedsRes.data ?? []
+  const shedIds = allSheds.map(s => s.id)
+
+  if (shedIds.length === 0) {
+    return <EmptySheds />
+  }
+
+  // Fetch active batches + all operational data scoped to these sheds
+  const [batchesRes, logsRes, salesRes, expensesRes, weightRes] = await Promise.all([
+    supabase
+      .from('batches')
+      .select('id, shed_id, breed, placement_date, starting_bird_count, status')
+      .in('shed_id', shedIds)
+      .eq('status', 'active'),
+    supabase
+      .from('daily_logs')
+      .select('batch_id, log_date, mortality_count, feed_given_kg, water_given_liters')
+      .order('log_date', { ascending: false }),
+    supabase.from('sales').select('batch_id, total_amount'),
+    supabase.from('expenses').select('batch_id, amount'),
+    supabase
+      .from('weight_samples')
+      .select('batch_id, avg_weight_g, sample_date')
+      .order('sample_date', { ascending: false }),
+  ])
   const activeBatches: RawBatch[] = batchesRes.data ?? []
   const allLogs: RawLog[] = logsRes.data ?? []
   const allSales: RawSale[] = salesRes.data ?? []
@@ -520,6 +540,22 @@ function OnboardingPrompt() {
     </div>
   )
 }
+
+function EmptySheds() {
+  return (
+    <div className="container" style={{ paddingTop: '32px' }}>
+      <div className="empty-state">
+        <div className="empty-state__icon">🏚️</div>
+        <div className="empty-state__title">No sheds yet</div>
+        <div className="empty-state__desc">Add your broiler sheds to start tracking batches.</div>
+        <Link href="/sheds/new" className="btn btn--primary" style={{ marginTop: '8px' }} id="btn-add-first-shed-empty">
+          Add First Shed
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 
 // ─── Inline style tokens ──────────────────────────────────────────────────────
 
