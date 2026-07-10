@@ -59,12 +59,14 @@ export default async function GrowthPage({ params }: Props) {
   const totalFeedKg = allLogs.reduce((s, l) => s + Number(l.feed_given_kg), 0)
   const liveBirds = batch.starting_bird_count - totalMortality
 
-  // Day of cycle
+  // Day of cycle — 1-based (Day 1 = placement day, same as dayOfCycle)
   const placementMs = new Date(batch.placement_date).getTime()
   function dayForDate(dateStr: string): number {
-    return Math.max(0, Math.floor((new Date(dateStr).getTime() - placementMs) / (1000 * 60 * 60 * 24)))
+    // Day 1 = placement day, Day 2 = next day, etc.
+    return Math.max(1, Math.floor((new Date(dateStr).getTime() - placementMs) / (1000 * 60 * 60 * 24)) + 1)
   }
-  const dayOfCycle = Math.max(0, Math.floor((Date.now() - placementMs) / (1000 * 60 * 60 * 24))) + 1
+  const dayOfCycle = Math.max(1, Math.floor((Date.now() - placementMs) / (1000 * 60 * 60 * 24)) + 1)
+
 
   // Latest weight sample
   const latestSample = allSamples[allSamples.length - 1]

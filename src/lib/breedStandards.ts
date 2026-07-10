@@ -54,20 +54,23 @@ export const BREED_STANDARDS: Record<BreedWithStandard, number[]> = {
 export function getStandardWeight(breed: string, day: number): number | null {
   if (!BREEDS_WITH_STANDARDS.includes(breed as BreedWithStandard)) return null
   const series = BREED_STANDARDS[breed as BreedWithStandard]
-  if (day < 0 || day > series.length - 1) return null
-  return series[Math.min(day, series.length - 1)]
+  // day is 1-based (Day 1 = placement day). Array is 0-indexed from day 0.
+  // Day 1 → index 1, Day 7 → index 7, etc.
+  const idx = Math.min(day, series.length - 1)
+  if (idx < 1 || idx > series.length - 1) return null
+  return series[idx]
 }
 
 /** Build chart data array merging actual weight samples with breed standard.
- *  actual: array of { day, avgWeightG } sorted by day ascending */
+ *  Both dayOfCycle and actual[].day are 1-based (Day 1 = placement day). */
 export function buildChartData(
   breed: string,
   dayOfCycle: number,
   actual: { day: number; avgWeightG: number }[]
 ) {
-  const maxDay = Math.min(dayOfCycle, 42)
+  const maxDay = Math.min(dayOfCycle, 43) // day 1..43
   const rows = []
-  for (let d = 0; d <= maxDay; d++) {
+  for (let d = 1; d <= maxDay; d++) {
     const std = getStandardWeight(breed, d)
     const sample = actual.find(a => a.day === d)
     rows.push({
