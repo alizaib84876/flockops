@@ -54,18 +54,23 @@ export default async function FinancialsPage({ params }: Props) {
 
   const allExpenses = expenses ?? []
 
-  // Sale record
-  const { data: sale } = await supabase
+  // All sales for this batch (multiple brokers)
+  const { data: sales } = await supabase
     .from('sales')
     .select('id, sale_date, buyer_name, total_weight_kg, rate_per_kg, condemned_birds_count, total_amount, notes')
     .eq('batch_id', batchId)
-    .maybeSingle()
+    .order('sale_date', { ascending: true })
+
+  const allSales = sales ?? []
+  const revenue = allSales.reduce((s, r) => s + Number(r.total_amount), 0)
+  const totalWeightSold = allSales.reduce((s, r) => s + Number(r.total_weight_kg), 0)
+  const totalCondemned = allSales.reduce((s, r) => s + Number(r.condemned_birds_count), 0)
 
   // Totals
   const totalExpenses = allExpenses.reduce((s, e) => s + Number(e.amount), 0)
-  const revenue = sale ? Number(sale.total_amount) : 0
   const profitLoss = revenue - totalExpenses
   const isProfit = profitLoss >= 0
+
 
   // Per-category breakdown
   const byCategory = allExpenses.reduce<Record<string, number>>((acc, e) => {
@@ -79,11 +84,11 @@ export default async function FinancialsPage({ params }: Props) {
   const costPerBird = batch.starting_bird_count > 0
     ? totalExpenses / batch.starting_bird_count
     : null
-  const costPerKg = sale && Number(sale.total_weight_kg) > 0
-    ? totalExpenses / Number(sale.total_weight_kg)
+  const costPerKg = totalWeightSold > 0
+    ? totalExpenses / totalWeightSold
     : null
-  const revenuePerKg = sale && Number(sale.total_weight_kg) > 0
-    ? revenue / Number(sale.total_weight_kg)
+  const revenuePerKg = totalWeightSold > 0 && revenue > 0
+    ? revenue / totalWeightSold
     : null
   const profitPerBird = batch.starting_bird_count > 0
     ? profitLoss / batch.starting_bird_count
@@ -207,78 +212,61 @@ export default async function FinancialsPage({ params }: Props) {
         )}
       </div>
 
-      {/* Sale record */}
+      {/* Sales record — multi-broker summary */}
       <div style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-          <p className="section-title" style={{ margin: 0 }}>Sale Record</p>
-          {isActive && (
-            <Link
-              href={`/sheds/${shedId}/batches/${batchId}/close`}
-              className="btn btn--ghost btn--sm"
-              id="btn-record-sale"
-              style={{ width: 'auto' }}
-            >
-              {sale ? 'Edit' : '+ Record'}
-            </Link>
-          )}
+          <p className="section-title" style={{ margin: 0 }}>Broker Sales ({allSales.length})</p>
+          <Link
+            href={`/sheds/${shedId}/batches/${batchId}/sales`}
+            className="btn btn--ghost btn--sm"
+            id="btn-manage-sales"
+            style={{ width: 'auto' }}
+          >
+            {allSales.length > 0 ? 'Manage' : '+ Record'}
+          </Link>
         </div>
 
-        {sale ? (
-          <div className="card">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: sale.notes ? '12px' : 0 }}>
-              <div>
-                <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Sale Date</div>
-                <div style={{ fontWeight: 600, marginTop: '2px' }}>{formatDate(sale.sale_date)}</div>
-              </div>
-              {sale.buyer_name && (
-                <div>
-                  <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Buyer</div>
-                  <div style={{ fontWeight: 600, marginTop: '2px' }}>{sale.buyer_name}</div>
-                </div>
-              )}
-              <div>
-                <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Weight Sold</div>
-                <div style={{ fontWeight: 600, marginTop: '2px' }}>{Number(sale.total_weight_kg).toLocaleString()} kg</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Rate</div>
-                <div style={{ fontWeight: 600, marginTop: '2px' }}>₨{Number(sale.rate_per_kg).toLocaleString()}/kg</div>
-              </div>
-              {Number(sale.condemned_birds_count) > 0 && (
-                <div>
-                  <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Condemned</div>
-                  <div style={{ fontWeight: 600, color: 'var(--red-400)', marginTop: '2px' }}>{sale.condemned_birds_count} birds</div>
-                </div>
-              )}
-              <div>
-                <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Total</div>
-                <div style={{ fontWeight: 800, fontSize: '1.125rem', color: 'var(--green-400)', marginTop: '2px' }}>{formatPKR(Number(sale.total_amount))}</div>
-              </div>
-            </div>
-            {sale.notes && (
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontStyle: 'italic', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', marginTop: '4px' }}>
-                &ldquo;{sale.notes}&rdquo;
-              </p>
-            )}
-          </div>
-        ) : (
+        {allSales.length === 0 ? (
           <div className="card" style={{ padding: '24px 16px', textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🏁</div>
-            <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>No sale recorded yet</div>
+            <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🤝</div>
+            <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>No sales recorded yet</div>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
-              Record the harvest sale to calculate profit/loss.
+              Record each broker sale separately. Multiple brokers supported.
             </p>
             <Link
-              href={`/sheds/${shedId}/batches/${batchId}/close`}
+              href={`/sheds/${shedId}/batches/${batchId}/sales`}
               className="btn btn--primary"
               id="btn-record-sale-cta"
               style={{ display: 'inline-flex', width: 'auto', padding: '14px 24px' }}
             >
-              🏁 Record Harvest Sale
+              🤝 Record Sales
             </Link>
+          </div>
+        ) : (
+          <div className="stack stack--sm">
+            {allSales.map((s, idx) => (
+              <div key={s.id} className="card" style={{ padding: '14px 16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{s.buyer_name || `Broker ${idx + 1}`}</div>
+                    <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      {formatDate(s.sale_date)} · {Number(s.total_weight_kg).toLocaleString()} kg · ₨{Number(s.rate_per_kg)}/kg
+                    </div>
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--green-400)' }}>
+                    {formatPKR(Number(s.total_amount))}
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div style={{ padding: '12px 14px', background: 'var(--accent-dim)', borderRadius: 'var(--radius-md)', display: 'flex', justifyContent: 'space-between', fontSize: '0.9375rem' }}>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Total revenue · {totalWeightSold.toLocaleString()} kg sold</span>
+              <span style={{ fontWeight: 800, color: 'var(--green-400)' }}>{formatPKR(revenue)}</span>
+            </div>
           </div>
         )}
       </div>
+
 
       {/* Expense breakdown by category */}
       <div style={{ marginBottom: '24px' }}>

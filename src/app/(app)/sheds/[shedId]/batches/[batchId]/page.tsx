@@ -160,11 +160,11 @@ export default async function BatchDetailPage({ params }: Props) {
             💰 Financials
           </Link>
           <Link
-            href={`/sheds/${shedId}/batches/${batchId}/close`}
+            href={`/sheds/${shedId}/batches/${batchId}/sales`}
             className="btn btn--secondary"
             id="btn-close-batch"
           >
-            🏁 Close / Harvest Batch
+            🤝 Sales & Close Batch
           </Link>
         </div>
       )}
