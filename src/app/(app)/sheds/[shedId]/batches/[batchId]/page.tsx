@@ -43,8 +43,6 @@ export default async function BatchDetailPage({ params }: Props) {
     .order('log_date', { ascending: false })
 
   const allLogs = logs ?? []
-
-  // Computed stats
   const totalMortality = allLogs.reduce((sum, l) => sum + l.mortality_count, 0)
   const totalFeed = allLogs.reduce((sum, l) => sum + Number(l.feed_given_kg), 0)
   const mortalityPct = batch.starting_bird_count > 0
@@ -52,6 +50,24 @@ export default async function BatchDetailPage({ params }: Props) {
     : '0.00'
   const dayOfCycle = getDayOfCycle(batch.placement_date)
   const daysRemaining = Math.max(0, 40 - dayOfCycle) // default 40-day cycle if no target
+
+  // Fetch latest weight sample for FCR
+  const { data: latestWeight } = await supabase
+    .from('weight_samples')
+    .select('avg_weight_g, sample_date')
+    .eq('batch_id', batchId)
+    .order('sample_date', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  // FCR = total feed / total weight gained
+  const CHICK_WEIGHT_G = 42
+  const liveBirds = batch.starting_bird_count - totalMortality
+  let fcr: number | null = null
+  if (latestWeight && totalFeed > 0) {
+    const gainKg = (Number(latestWeight.avg_weight_g) - CHICK_WEIGHT_G) / 1000 * liveBirds
+    if (gainKg > 0) fcr = totalFeed / gainKg
+  }
 
   function getDayOfCycle(pd: string): number {
     const placed = new Date(pd)
@@ -103,6 +119,19 @@ export default async function BatchDetailPage({ params }: Props) {
             <div className="stat-card__value">{totalFeed.toFixed(0)}</div>
             <div className="stat-card__sub">kg consumed</div>
           </div>
+          {/* FCR stat */}
+          <div className="stat-card" style={{ borderColor: fcr !== null && fcr < 1.8 ? 'rgba(34,197,94,0.25)' : fcr !== null && fcr > 2.0 ? 'rgba(239,68,68,0.25)' : undefined }}>
+            <div className="stat-card__label">FCR</div>
+            <div className="stat-card__value" style={{ color: fcr === null ? 'var(--text-muted)' : fcr < 1.8 ? 'var(--green-400)' : fcr > 2.0 ? 'var(--red-400)' : 'var(--amber-400)' }}>
+              {fcr !== null ? fcr.toFixed(2) : '—'}
+            </div>
+            <div className="stat-card__sub">{fcr !== null ? (fcr < 1.6 ? 'Excellent' : fcr < 1.8 ? 'Good' : fcr < 2.0 ? 'Average' : 'Poor') : 'No weight data'}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-card__label">Live Birds</div>
+            <div className="stat-card__value">{liveBirds.toLocaleString()}</div>
+            <div className="stat-card__sub">est. current</div>
+          </div>
         </div>
       </div>
 
@@ -115,6 +144,13 @@ export default async function BatchDetailPage({ params }: Props) {
             id="btn-enter-daily-log"
           >
             📋 Enter Today&apos;s Log
+          </Link>
+          <Link
+            href={`/sheds/${shedId}/batches/${batchId}/growth`}
+            className="btn btn--secondary"
+            id="btn-view-growth"
+          >
+            📈 Growth & FCR
           </Link>
           <Link
             href={`/sheds/${shedId}/batches/${batchId}/close`}

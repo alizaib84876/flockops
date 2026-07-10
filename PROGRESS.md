@@ -2,7 +2,7 @@
 
 > Update this file continuously, not in batches. This is what lets any AI session — including a different AI model — pick up work with zero lost context. See `CLAUDE.md` for the update protocol.
 
-Last updated: 2026-07-10 (Step 2 complete)
+Last updated: 2026-07-10 (Step 4 complete)
 
 ## Current Phase
 
@@ -42,7 +42,13 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
   - [x] Edit history written to daily_log_edits (spec §9 audit trail)
   - [x] Offline-first: localStorage cache + pending sync banner + Sync now button
 - [ ] Step 3 — Deployed for one live batch
-- [ ] Step 4 — Growth & feed efficiency tracking
+- [x] Step 4 — Growth & feed efficiency tracking
+  - [x] breedStandards.ts: Ross 308 + Cobb 500 day-by-day target weights (g, day 0–42)
+  - [x] GrowthChart component (recharts): actual vs standard curve, Today line
+  - [x] /growth page: FCR calculation + quality rating (Excellent/Good/Average/Poor)
+  - [x] vs-standard delta per sample shown in table
+  - [x] /weights/new: weight sample entry form
+  - [x] Batch detail: FCR stat card + live birds + Growth & FCR button
 - [ ] Step 5 — Financial tracking
 - [ ] Step 6 — Multi-shed dashboard
 - [ ] Step 7 — Alerting
@@ -56,8 +62,7 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
 
 ## In Progress
 
-- Step 3: Deploy for one live batch (user action required — see Next Immediate Task)
-- Step 4: Growth & feed efficiency tracking — next code step after Step 3 is validated
+- Step 5: Financial tracking — next code task
 
 ## Known Issues / Bugs / Stubs
 
@@ -98,18 +103,19 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
 
 ## Next Immediate Task
 
-Step 3 (deploy for live batch) is a user action, not a code task:
-1. User signs up / logs in at the deployed app (or localhost: `npm run dev`)
-2. Creates farm (Settings → Create Farm)
-3. Creates first shed (Sheds → New Shed)
-4. Starts a batch (Shed detail → Start New Batch)
-5. Enters first daily log for today
-6. Validates the full flow works end-to-end with real data
-
-Once Step 3 is validated by the farm owner for at least a few days, next CODE task is:
-Step 4 — Growth & feed efficiency tracking:
-- Build weight sample entry form: `src/app/(app)/sheds/[shedId]/batches/[batchId]/weights/new/page.tsx`
-- Build FCR calculation: cumulative_feed_kg / (current_avg_weight_g/1000 * live_bird_count)
-- Build growth chart: actual weight vs. Ross 308 / Cobb 500 breed standard curve
-- Library to use for chart: recharts (`npm install recharts`)
-- Breed standard data: hardcode Ross 308 and Cobb 500 day-by-day target weights (g) in a constants file
+Step 5 — Financial tracking:
+- Expense logging form: `src/app/(app)/sheds/[shedId]/batches/[batchId]/expenses/new/page.tsx`
+  - Fields: category (chicks/feed/medicine/labor/utilities/other), amount (PKR), date, notes
+- Expenses list page: `src/app/(app)/sheds/[shedId]/batches/[batchId]/expenses/page.tsx`
+  - Show total per category + grand total
+- Harvest/sale record form: `src/app/(app)/sheds/[shedId]/batches/[batchId]/close/page.tsx`
+  - Replace the stub: fields = buyer_name, sale_date, total_weight_kg, rate_per_kg,
+    condemned_birds_count, total_amount (auto-calculated or manual)
+  - On submit: insert into sales table, update batch status to 'harvested'
+- Financials summary page: `src/app/(app)/sheds/[shedId]/batches/[batchId]/financials/page.tsx`
+  - Revenue = total_amount from sales record
+  - Total expenses = sum of expenses table for this batch
+  - Profit/loss = revenue - total expenses
+  - Cost per bird = total expenses / starting_bird_count
+  - Cost per kg = total expenses / total_weight_sold
+- Add 'Financials' button to batch detail page actions
