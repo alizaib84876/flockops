@@ -2,7 +2,7 @@
 
 > Update this file continuously, not in batches. This is what lets any AI session — including a different AI model — pick up work with zero lost context. See `CLAUDE.md` for the update protocol.
 
-Last updated: 2026-07-10 (Step 4 complete)
+Last updated: 2026-07-10 (Step 5 complete)
 
 ## Current Phase
 
@@ -49,7 +49,12 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
   - [x] vs-standard delta per sample shown in table
   - [x] /weights/new: weight sample entry form
   - [x] Batch detail: FCR stat card + live birds + Growth & FCR button
-- [ ] Step 5 — Financial tracking
+- [x] Step 5 — Financial tracking
+  - [x] /expenses/new: visual category picker (chicks/feed/medicine/labor/utilities/other), PKR amount
+  - [x] /close: harvest/sale form — weight, rate/kg, condemned birds, auto revenue, 2-step confirm
+  - [x] /financials: P&L hub — net profit/loss, cost/bird, cost/kg, revenue/kg, profit/bird
+  - [x] Category cost breakdown bars with % share
+  - [x] Batch detail: Financials button added
 - [ ] Step 6 — Multi-shed dashboard
 - [ ] Step 7 — Alerting
 - [ ] Step 8 — Reporting
@@ -62,7 +67,7 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
 
 ## In Progress
 
-- Step 5: Financial tracking — next code task
+- Step 6: Multi-shed dashboard — next code task
 
 ## Known Issues / Bugs / Stubs
 
@@ -103,19 +108,9 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
 
 ## Next Immediate Task
 
-Step 5 — Financial tracking:
-- Expense logging form: `src/app/(app)/sheds/[shedId]/batches/[batchId]/expenses/new/page.tsx`
-  - Fields: category (chicks/feed/medicine/labor/utilities/other), amount (PKR), date, notes
-- Expenses list page: `src/app/(app)/sheds/[shedId]/batches/[batchId]/expenses/page.tsx`
-  - Show total per category + grand total
-- Harvest/sale record form: `src/app/(app)/sheds/[shedId]/batches/[batchId]/close/page.tsx`
-  - Replace the stub: fields = buyer_name, sale_date, total_weight_kg, rate_per_kg,
-    condemned_birds_count, total_amount (auto-calculated or manual)
-  - On submit: insert into sales table, update batch status to 'harvested'
-- Financials summary page: `src/app/(app)/sheds/[shedId]/batches/[batchId]/financials/page.tsx`
-  - Revenue = total_amount from sales record
-  - Total expenses = sum of expenses table for this batch
-  - Profit/loss = revenue - total expenses
-  - Cost per bird = total expenses / starting_bird_count
-  - Cost per kg = total expenses / total_weight_sold
-- Add 'Financials' button to batch detail page actions
+Step 6 — Multi-shed dashboard (rebuild /dashboard):
+- Show all 4 sheds in a card grid
+- Each card: shed name, active batch (breed + day of cycle), mortality %, FCR if available
+- Summary row at top: total active sheds, total birds across all sheds, total mortality today
+- Quick links from dashboard: tap shed card → go to shed detail
+- Dashboard must work even when some sheds have no active batch

@@ -153,6 +153,13 @@ export default async function BatchDetailPage({ params }: Props) {
             📈 Growth & FCR
           </Link>
           <Link
+            href={`/sheds/${shedId}/batches/${batchId}/financials`}
+            className="btn btn--secondary"
+            id="btn-view-financials"
+          >
+            💰 Financials
+          </Link>
+          <Link
             href={`/sheds/${shedId}/batches/${batchId}/close`}
             className="btn btn--secondary"
             id="btn-close-batch"
@@ -161,6 +168,7 @@ export default async function BatchDetailPage({ params }: Props) {
           </Link>
         </div>
       )}
+
 
       {/* Recent Daily Logs */}
       <div>
