@@ -2,7 +2,7 @@
 
 > Update this file continuously, not in batches. This is what lets any AI session — including a different AI model — pick up work with zero lost context. See `CLAUDE.md` for the update protocol.
 
-Last updated: 2026-07-10
+Last updated: 2026-07-10 (Step 2 complete)
 
 ## Current Phase
 
@@ -33,7 +33,14 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
   - [x] Login/Signup page (`/login`)
   - [x] All 13 routes compile clean; build passes
 
-- [ ] Step 2 — Daily operations logging screen
+- [x] Step 2 — Daily operations logging screen
+  - [x] NumericStepper with +/- buttons (52px touch targets)
+  - [x] Required: mortality, feed given, feed stock remaining
+  - [x] Optional: water, temperature, humidity, notes
+  - [x] Running totals (mortality %, total feed, birds alive) always visible
+  - [x] Today's log read-only summary + Edit button
+  - [x] Edit history written to daily_log_edits (spec §9 audit trail)
+  - [x] Offline-first: localStorage cache + pending sync banner + Sync now button
 - [ ] Step 3 — Deployed for one live batch
 - [ ] Step 4 — Growth & feed efficiency tracking
 - [ ] Step 5 — Financial tracking
@@ -49,14 +56,8 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
 
 ## In Progress
 
-- Step 2: Daily operations logging screen
-  - Next task: build `/sheds/[shedId]/batches/[batchId]/log/page.tsx`
-  - Must include: mortality_count (required), feed_given_kg (required),
-    feed_stock_remaining_kg (required), water_consumption_l (optional),
-    temperature_c (optional), humidity_pct (optional), notes (optional)
-  - After form: show running totals (cumulative mortality, cumulative feed, mortality %)
-  - Offline support: cache entry in localStorage if no connection; sync on reconnect
-  - One log per batch per day enforced (show today's existing log if already submitted)
+- Step 3: Deploy for one live batch (user action required — see Next Immediate Task)
+- Step 4: Growth & feed efficiency tracking — next code step after Step 3 is validated
 
 ## Known Issues / Bugs / Stubs
 
@@ -97,14 +98,18 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
 
 ## Next Immediate Task
 
-Build the daily operations logging screen:
-- File: `src/app/(app)/sheds/[shedId]/batches/[batchId]/log/page.tsx`
-- This is a 'use client' page (form interaction)
-- Check if today's log already exists for this batch — if yes, show it with an edit option
-- Required fields: mortality_count (integer ≥ 0), feed_given_kg (decimal), feed_stock_remaining_kg (decimal)
-- Optional fields: water_consumption_l, temperature_c, humidity_pct, notes
-- On submit: INSERT into daily_logs with logged_by_user_id = current user's id
-- After submit: show success + running totals (cumulative mortality, cumulative feed used,
-  mortality % of starting_bird_count)
-- Offline: if fetch fails with network error, store in localStorage and show "pending sync" banner
-- Spec §8: usable in under 60 seconds; large touch targets; minimal taps
+Step 3 (deploy for live batch) is a user action, not a code task:
+1. User signs up / logs in at the deployed app (or localhost: `npm run dev`)
+2. Creates farm (Settings → Create Farm)
+3. Creates first shed (Sheds → New Shed)
+4. Starts a batch (Shed detail → Start New Batch)
+5. Enters first daily log for today
+6. Validates the full flow works end-to-end with real data
+
+Once Step 3 is validated by the farm owner for at least a few days, next CODE task is:
+Step 4 — Growth & feed efficiency tracking:
+- Build weight sample entry form: `src/app/(app)/sheds/[shedId]/batches/[batchId]/weights/new/page.tsx`
+- Build FCR calculation: cumulative_feed_kg / (current_avg_weight_g/1000 * live_bird_count)
+- Build growth chart: actual weight vs. Ross 308 / Cobb 500 breed standard curve
+- Library to use for chart: recharts (`npm install recharts`)
+- Breed standard data: hardcode Ross 308 and Cobb 500 day-by-day target weights (g) in a constants file

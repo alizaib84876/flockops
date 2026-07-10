@@ -1,0 +1,140 @@
+/* ── Numeric Stepper ── */
+.stepperRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepBtn {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 1.375rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  font-family: inherit;
+  user-select: none;
+}
+
+.stepBtn:hover {
+  background: var(--gray-700);
+  border-color: var(--gray-500);
+}
+
+.stepBtn:active {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(0.95);
+}
+
+.stepperInput {
+  text-align: center;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  flex: 1;
+  /* Remove spinner arrows */
+  -moz-appearance: textfield;
+}
+
+.stepperInput::-webkit-inner-spin-button,
+.stepperInput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ── Unit label ── */
+.unit {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  margin-left: 4px;
+}
+
+/* ── Pending sync banner ── */
+.pendingBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: var(--radius-md);
+  color: var(--amber-400);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.pendingBanner span:nth-child(2) {
+  flex: 1;
+}
+
+.syncBtn {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--amber-400);
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all var(--transition);
+}
+
+.syncBtn:hover {
+  background: rgba(251, 191, 36, 0.25);
+}
+
+.syncBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Today's log summary (read-only view) ── */
+.logSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.logSummaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.logSummaryLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.logSummaryValue {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.safe {
+  color: var(--green-400);
+}
+
+.danger {
+  color: var(--red-400);
+}
