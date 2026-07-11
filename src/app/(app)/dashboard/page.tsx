@@ -119,13 +119,29 @@ export default async function DashboardPage() {
       .select('batch_id, avg_weight_g, sample_date')
       .order('sample_date', { ascending: false }),
   ])
+
   const activeBatches: RawBatch[] = batchesRes.data ?? []
-  const allLogs: RawLog[] = logsRes.data ?? []
+  const activeBatchIds = activeBatches.map(b => b.id)
+
+  // Fetch today's logs separately — server-side date filter is the most reliable
+  // approach; avoids any timezone/format mismatch in JS string comparison
+  const todayLogsRes = activeBatchIds.length > 0
+    ? await supabase
+        .from('daily_logs')
+        .select('batch_id')
+        .in('batch_id', activeBatchIds)
+        .eq('log_date', todayStr())
+    : { data: [] }
+
+  const todayLoggedBatchIds = new Set((todayLogsRes.data ?? []).map(l => l.batch_id))
+
+  const allLogs: RawLog[] = (logsRes.data ?? []).filter(l => activeBatchIds.includes(l.batch_id))
   const allSales: RawSale[] = salesRes.data ?? []
   const allExpenses: RawExpense[] = expensesRes.data ?? []
+
   const allWeights: RawWeightSample[] = weightRes.data ?? []
 
-  const activeBatchIds = new Set(activeBatches.map(b => b.id))
+  // activeBatchIds already declared above as an array; today used only for mortality filter
   const today = todayStr()
 
   // ── Build per-shed data ──────────────────────────────────────────────────────
@@ -165,9 +181,10 @@ export default async function DashboardPage() {
     const liveBirds = batch.starting_bird_count - totalMortality
     const mortalityPct = ((totalMortality / batch.starting_bird_count) * 100).toFixed(2)
 
-    const todayLog = batchLogs.find(l => l.log_date === today)
+    // Use server-side verified set — avoids any JS timezone/format mismatch
+    const loggedToday = todayLoggedBatchIds.has(batch.id)
+    const todayLog = loggedToday ? batchLogs.find(l => l.log_date === today) : null
     const todayFeedKg = todayLog ? Number(todayLog.feed_given_kg) : null
-    const loggedToday = !!todayLog
 
     // Latest weight sample
     const latestWeight = allWeights.find(w => w.batch_id === batch.id)
@@ -200,7 +217,7 @@ export default async function DashboardPage() {
   const activeCount = shedCards.filter(c => c.batch !== null).length
   const totalLiveBirds = shedCards.reduce((s, c) => s + (c.liveBirds ?? 0), 0)
   const todayTotalMortality = allLogs
-    .filter(l => l.log_date === today && activeBatchIds.has(l.batch_id))
+    .filter(l => todayLoggedBatchIds.has(l.batch_id) && l.log_date === today)
     .reduce((s, l) => s + Number(l.mortality_count), 0)
   const logsCompleteToday = shedCards.filter(c => c.batch && c.loggedToday).length
   const needsLogToday = shedCards.filter(c => c.batch && !c.loggedToday).length
