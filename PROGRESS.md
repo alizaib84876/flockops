@@ -2,7 +2,7 @@
 
 > Update this file continuously, not in batches. This is what lets any AI session — including a different AI model — pick up work with zero lost context. See `CLAUDE.md` for the update protocol.
 
-Last updated: 2026-07-10 (Step 5 complete)
+Last updated: 2026-07-11 (Steps 6 + 7 complete)
 
 ## Current Phase
 
@@ -55,8 +55,24 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
   - [x] /financials: P&L hub — net profit/loss, cost/bird, cost/kg, revenue/kg, profit/bird
   - [x] Category cost breakdown bars with % share
   - [x] Batch detail: Financials button added
-- [ ] Step 6 — Multi-shed dashboard
-- [ ] Step 7 — Alerting
+- [x] Step 6 — Multi-shed dashboard
+  - [x] Farm summary strip: active sheds / live birds / mortality today / log completion count
+  - [x] Per-shed cards: mortality %, FCR, today's feed, latest weight, Log Today button
+  - [x] High mortality (>3%) red card border; missing log amber border
+  - [x] Quick-link pills: Batch / Growth / Financials / Sales
+  - [x] Pending log alert banner
+  - [x] Fix: batches scoped by shed_id (not farm_id) — was showing no active batches
+  - [x] Fix: logged-today detection via server-side Supabase query (no JS date comparison)
+- [x] Step 7 — Alerting
+  - [x] /alerts: 4 rule-based alert types computed live each page load
+    - Missing daily log (active shed, no entry today)
+    - Mortality spike (today > 2× 3-day rolling average)
+    - High cumulative mortality (≥5% warning, ≥8% critical)
+    - Low feed stock (<2 days supply remaining)
+  - [x] Alert cards: colour-coded critical/warning, detail text, direct action deep link
+  - [x] Alert rules legend on the page
+  - [x] Bottom nav bell badge: red count of active alerts
+  - [x] Top bar: pulsing alert count pill when alerts exist
 - [ ] Step 8 — Reporting
 - [ ] Step 9 — Multi-tenancy
 - [ ] Step 10 — Subscription & billing
@@ -67,7 +83,7 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
 
 ## In Progress
 
-- Step 6: Multi-shed dashboard — next code task
+- Step 8: Reporting — per-batch and per-shed exportable PDF/Excel reports
 
 ## Known Issues / Bugs / Stubs
 
@@ -108,9 +124,7 @@ Phase A — Internal Tool (steps 1–8 of the implementation sequence in `broile
 
 ## Next Immediate Task
 
-Step 6 — Multi-shed dashboard (rebuild /dashboard):
-- Show all 4 sheds in a card grid
-- Each card: shed name, active batch (breed + day of cycle), mortality %, FCR if available
-- Summary row at top: total active sheds, total birds across all sheds, total mortality today
-- Quick links from dashboard: tap shed card → go to shed detail
-- Dashboard must work even when some sheds have no active batch
+Step 8 — Reporting:
+- Per-batch summary report (key metrics, FCR, P&L, mortality curve)
+- Per-shed historical batch comparison
+- Export to PDF (printable)
