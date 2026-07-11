@@ -544,6 +544,12 @@ select.form-input {
   100% { background-position: -200% 0; }
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.75; transform: scale(1.1); }
+}
+
+
 /* ─────────────────────────────────────────────────────
    EMPTY STATE
 ───────────────────────────────────────────────────── */

@@ -4,15 +4,20 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import styles from './AppShell.module.css'
 
-const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Home', icon: HomeIcon },
-  { href: '/sheds', label: 'Sheds', icon: ShedIcon },
-  { href: '/alerts', label: 'Alerts', icon: AlertIcon },
-  { href: '/settings', label: 'Settings', icon: SettingsIcon },
-]
+interface AppShellProps {
+  children: React.ReactNode
+  alertCount?: number
+}
 
-export default function AppShell({ children }: { children: React.ReactNode }) {
+export default function AppShell({ children, alertCount = 0 }: AppShellProps) {
   const pathname = usePathname()
+
+  const NAV_ITEMS = [
+    { href: '/dashboard', label: 'Home',     icon: HomeIcon,     badge: 0 },
+    { href: '/sheds',     label: 'Sheds',    icon: ShedIcon,     badge: 0 },
+    { href: '/alerts',    label: 'Alerts',   icon: AlertIcon,    badge: alertCount },
+    { href: '/settings',  label: 'Settings', icon: SettingsIcon, badge: 0 },
+  ]
 
   return (
     <div className={styles.shell}>
@@ -22,6 +27,26 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="topbar__logo-icon">🐔</div>
           <span>FlockOps</span>
         </div>
+        {alertCount > 0 && (
+          <Link href="/alerts" style={{ textDecoration: 'none' }}>
+            <div style={{
+              background: 'var(--red-400)',
+              color: '#fff',
+              fontWeight: 800,
+              fontSize: '0.75rem',
+              minWidth: '22px',
+              height: '22px',
+              borderRadius: '11px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 6px',
+              animation: 'pulse 2s infinite',
+            }}>
+              {alertCount > 9 ? '9+' : alertCount}
+            </div>
+          </Link>
+        )}
       </header>
 
       {/* Main content */}
@@ -31,7 +56,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Bottom navigation */}
       <nav className="bottom-nav" aria-label="Main navigation">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {NAV_ITEMS.map(({ href, label, icon: Icon, badge }) => {
           const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
           return (
             <Link
@@ -41,7 +66,31 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               aria-current={isActive ? 'page' : undefined}
               id={`nav-${label.toLowerCase()}`}
             >
-              <Icon />
+              <div style={{ position: 'relative', display: 'inline-flex' }}>
+                <Icon />
+                {badge > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-5px',
+                    right: '-7px',
+                    background: 'var(--red-400)',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.6rem',
+                    minWidth: '16px',
+                    height: '16px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0 3px',
+                    lineHeight: 1,
+                    border: '1.5px solid var(--bg-base)',
+                  }}>
+                    {badge > 9 ? '9+' : badge}
+                  </span>
+                )}
+              </div>
               <span>{label}</span>
             </Link>
           )

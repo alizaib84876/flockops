@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AppShell from '@/components/AppShell'
+import { getAlertCount } from '@/lib/alertCount'
 
 export default async function AppLayout({
   children,
@@ -14,5 +15,8 @@ export default async function AppLayout({
     redirect('/login')
   }
 
-  return <AppShell>{children}</AppShell>
+  // Fetch alert count server-side — passed to AppShell for the nav badge
+  const alertCount = await getAlertCount()
+
+  return <AppShell alertCount={alertCount}>{children}</AppShell>
 }
