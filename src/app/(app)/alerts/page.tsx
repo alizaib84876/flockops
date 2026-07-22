@@ -39,14 +39,64 @@ function daysAgo(n: number) {
 
 function severityConfig(s: AlertSeverity) {
   switch (s) {
-    case 'critical': return { icon: '🔴', label: 'Critical', color: 'var(--red-400)', bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.25)' }
-    case 'warning':  return { icon: '🟡', label: 'Warning',  color: 'var(--amber-400)', bg: 'rgba(245,158,11,0.06)', border: 'rgba(245,158,11,0.25)' }
-    case 'info':     return { icon: '🔵', label: 'Info',     color: '#60a5fa', bg: 'rgba(96,165,250,0.06)', border: 'rgba(96,165,250,0.2)' }
+    case 'critical': return { iconEl: <CriticalIcon />, label: 'Critical', color: 'var(--red-400)', bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.25)' }
+    case 'warning':  return { iconEl: <WarningIcon />,  label: 'Warning',  color: 'var(--amber-400)', bg: 'rgba(245,158,11,0.06)', border: 'rgba(245,158,11,0.25)' }
+    case 'info':     return { iconEl: <InfoIcon />,     label: 'Info',     color: '#60a5fa', bg: 'rgba(96,165,250,0.06)', border: 'rgba(96,165,250,0.2)' }
   }
 }
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' })
+}
+
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+
+function CriticalIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red-400)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  )
+}
+
+function WarningIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber-400)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  )
+}
+
+function InfoIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+  )
+}
+
+function CheckCircleIcon() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="9 12 11 14 15 10" />
+    </svg>
+  )
+}
+
+function BellOutlineIcon() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  )
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -68,7 +118,9 @@ export default async function AlertsPage() {
     return (
       <div className="container" style={{ paddingTop: '32px' }}>
         <div className="empty-state">
-          <div className="empty-state__icon">🔔</div>
+          <div className="empty-state__icon" style={{ color: 'var(--text-muted)', opacity: 0.5 }}>
+            <BellOutlineIcon />
+          </div>
           <div className="empty-state__title">No farm set up yet</div>
           <div className="empty-state__desc">Create your farm to start receiving alerts.</div>
         </div>
@@ -290,18 +342,20 @@ export default async function AlertsPage() {
           Alert Rules
         </div>
         <div className="stack" style={{ gap: '4px' }}>
-          <span>🔴 <strong>Mortality spike</strong> — today&apos;s deaths &gt; 2× the 3-day rolling avg</span>
-          <span>🔴 <strong>Critical mortality</strong> — cumulative deaths ≥ 8% of flock</span>
-          <span>🟡 <strong>High mortality</strong> — cumulative deaths 5–8% of flock</span>
-          <span>🟡 <strong>Low feed stock</strong> — &lt;2 days of supply remaining at current rate</span>
-          <span>🟡 <strong>Missing log</strong> — active shed has no entry for today</span>
+          <span><span style={{ color: 'var(--red-400)', fontWeight: 700 }}>[C]</span> <strong>Mortality spike</strong> — today&apos;s deaths &gt; 2× the 3-day rolling avg</span>
+          <span><span style={{ color: 'var(--red-400)', fontWeight: 700 }}>[C]</span> <strong>Critical mortality</strong> — cumulative deaths ≥ 8% of flock</span>
+          <span><span style={{ color: 'var(--amber-400)', fontWeight: 700 }}>[W]</span> <strong>High mortality</strong> — cumulative deaths 5–8% of flock</span>
+          <span><span style={{ color: 'var(--amber-400)', fontWeight: 700 }}>[W]</span> <strong>Low feed stock</strong> — &lt;2 days of supply remaining at current rate</span>
+          <span><span style={{ color: 'var(--amber-400)', fontWeight: 700 }}>[W]</span> <strong>Missing log</strong> — active shed has no entry for today</span>
         </div>
       </div>
 
       {/* Alert list */}
       {alerts.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state__icon">✅</div>
+          <div className="empty-state__icon" style={{ color: 'var(--green-400)', opacity: 0.8 }}>
+            <CheckCircleIcon />
+          </div>
           <div className="empty-state__title">All clear</div>
           <div className="empty-state__desc">
             No mortality spikes, feed issues, or missing logs detected across {activeBatches.length} active batch{activeBatches.length !== 1 ? 'es' : ''}.
@@ -323,7 +377,7 @@ export default async function AlertsPage() {
               >
                 {/* Alert header */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '1.25rem', lineHeight: 1, flexShrink: 0 }}>{cfg.icon}</span>
+                  <span style={{ flexShrink: 0, display: 'flex' }}>{cfg.iconEl}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--text-primary)', lineHeight: 1.3 }}>
                       {alert.title}
@@ -383,7 +437,9 @@ function NoAlertsState({ reason }: { reason: string }) {
   return (
     <div className="container" style={{ paddingTop: '32px' }}>
       <div className="empty-state">
-        <div className="empty-state__icon">🔔</div>
+        <div className="empty-state__icon" style={{ color: 'var(--text-muted)', opacity: 0.5 }}>
+          <BellOutlineIcon />
+        </div>
         <div className="empty-state__title">No alerts</div>
         <div className="empty-state__desc">{reason} Alerts will appear here once you have active batches.</div>
       </div>

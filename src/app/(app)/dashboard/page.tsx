@@ -238,7 +238,7 @@ export default async function DashboardPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <h1 style={{ fontSize: '1.375rem', fontWeight: 800, marginBottom: '2px' }}>
-              Good {getGreeting()} 👋
+              Good {getGreeting()}
             </h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
               {activeCount > 0
@@ -292,7 +292,7 @@ export default async function DashboardPage() {
       {/* ── Pending logs alert ───────────────────────────────────────────────── */}
       {needsLogToday > 0 && (
         <div className="alert-banner alert-banner--warn" style={{ marginBottom: '16px' }}>
-          <span>⚠️</span>
+          <span style={{ fontSize: '1.1rem' }}>⚠</span>
           <span style={{ fontSize: '0.875rem' }}>
             <strong>{needsLogToday} shed{needsLogToday !== 1 ? 's' : ''}</strong> still need{needsLogToday === 1 ? 's' : ''} today&apos;s log entered
           </span>
@@ -309,7 +309,11 @@ export default async function DashboardPage() {
 
       {allSheds.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state__icon">🏚️</div>
+          <div className="empty-state__icon" style={{ fontSize: '2.5rem', opacity: 0.4, color: 'var(--text-muted)' }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            </svg>
+          </div>
           <div className="empty-state__title">No sheds yet</div>
           <div className="empty-state__desc">Add your broiler sheds to start tracking.</div>
           <Link href="/sheds/new" className="btn btn--primary" style={{ marginTop: '8px' }} id="btn-add-first-shed">
@@ -368,8 +372,12 @@ function ShedCard({ card, fcrLabel }: ShedCardProps) {
             <div style={{
               width: '40px', height: '40px', borderRadius: 'var(--radius-md)',
               background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0,
-            }}>🏚️</div>
+              justifyContent: 'center', flexShrink: 0, color: 'var(--text-muted)',
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              </svg>
+            </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: '1rem' }}>{shed.name}</div>
               <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -396,11 +404,16 @@ function ShedCard({ card, fcrLabel }: ShedCardProps) {
       {/* Card header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
         <Link href={`/sheds/${shed.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-          <div style={{
+            <div style={{
             width: '40px', height: '40px', borderRadius: 'var(--radius-md)',
             background: 'var(--accent-dim)', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0,
-          }}>🏠</div>
+            justifyContent: 'center', flexShrink: 0, color: 'var(--accent)',
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+          </div>
           <div>
             <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>{shed.name}</div>
             <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '1px' }}>
@@ -545,7 +558,13 @@ function OnboardingPrompt() {
   return (
     <div className="container" style={{ paddingTop: '32px' }}>
       <div className="card" style={{ textAlign: 'center', padding: '40px 24px' }}>
-        <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🐔</div>
+        <div style={{ marginBottom: '16px', color: 'var(--accent)' }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2C10 2 8.5 3 8 4.5c-.5 1.5.5 3 2 3.5" />
+            <path d="M10 8C7 8 4 10 4 13c0 2 1 3.5 2.5 4.5L5 21h14l-1.5-3.5C19 16.5 20 15 20 13c0-3-3-5-6-5h-4z" />
+            <circle cx="15" cy="6" r="1.5" fill="currentColor" stroke="none" />
+          </svg>
+        </div>
         <h1 style={{ fontSize: '1.375rem', marginBottom: '8px' }}>Welcome to FlockOps</h1>
         <p style={{ color: 'var(--text-muted)', marginBottom: '28px', fontSize: '0.9375rem', maxWidth: '300px', margin: '0 auto 28px' }}>
           Set up your farm profile first, then add your sheds and start tracking.
@@ -562,7 +581,11 @@ function EmptySheds() {
   return (
     <div className="container" style={{ paddingTop: '32px' }}>
       <div className="empty-state">
-        <div className="empty-state__icon">🏚️</div>
+        <div className="empty-state__icon" style={{ color: 'var(--text-muted)', opacity: 0.5 }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          </svg>
+        </div>
         <div className="empty-state__title">No sheds yet</div>
         <div className="empty-state__desc">Add your broiler sheds to start tracking batches.</div>
         <Link href="/sheds/new" className="btn btn--primary" style={{ marginTop: '8px' }} id="btn-add-first-shed-empty">
