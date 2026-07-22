@@ -27,12 +27,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Anti-flash script: reads stored theme and sets data-theme before paint */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('flockops-theme');document.documentElement.setAttribute('data-theme',t||'dark');}catch(e){}})()` }} />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <ThemeProvider>
           {children}
         </ThemeProvider>
